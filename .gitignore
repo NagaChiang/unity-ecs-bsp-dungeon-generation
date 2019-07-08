@@ -36,6 +36,6 @@ sysinfo.txt
 *.apk
 *.unitypackage
 
-# Submodules (symlinks)
-Plugins/
-Plugins.meta
+# ECS
+EntityCache/
+EntityCache.meta

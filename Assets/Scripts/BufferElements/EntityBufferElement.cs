@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using Unity.Entities;
 using UnityEngine;
 
-public struct CellComponent : IComponentData
+[InternalBufferCapacity(0)]
+public struct EntityBufferElement : IBufferElementData
 {
-    public bool IsWall;
+    public Entity Entity;
 }

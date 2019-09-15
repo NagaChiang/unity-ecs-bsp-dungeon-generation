@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
@@ -7,7 +8,7 @@ using UnityEngine;
 [System.Serializable]
 public struct DungeonComponent : IComponentData
 {
-    public float2 DungeonSize;
-    public float CellWidth;
+    public int2 SizeInCell;
     public int BspDepth;
+    public bool IsPendingGenerate;
 }

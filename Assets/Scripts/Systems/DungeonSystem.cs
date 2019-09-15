@@ -60,13 +60,6 @@ public class DungeonSystem : ComponentSystem
                     Entity = entity,
                 };
                 cellsBuffer.Add(bufferElem);
-                //Material cellMaterial = x % 2 == 0 ? GameManager.Instance().CellGroundMaterial : GameManager.Instance().CellWallMaterial;
-                /*
-                PostUpdateCommands.SetSharedComponent(entity, new RenderMesh {
-                    mesh = GameManager.Instance().CellMesh,
-                    material = cellMaterial,
-                });
-                */
             }
         }
 

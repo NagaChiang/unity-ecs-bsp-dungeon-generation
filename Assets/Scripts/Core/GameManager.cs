@@ -9,7 +9,7 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    [Header("Dungeon")]
+    [Header("Dungeon")] 
     public DungeonComponent DungeonSettings;
 
     [Header("Cell")]
@@ -17,6 +17,9 @@ public class GameManager : MonoBehaviour
     public Mesh CellMesh;
     public Material CellGroundMaterial;
     public Material CellWallMaterial;
+
+    [Header("Display")]
+    public float SecondPerStep;
 
     // Archetypes
     public EntityArchetype DungeonArchetype;
@@ -26,12 +29,6 @@ public class GameManager : MonoBehaviour
 
     public static GameManager Instance()
     {
-        if (!PrivateInstance)
-        {
-            GameObject obj = new GameObject("GameManager");
-            PrivateInstance = obj.AddComponent<GameManager>();
-        }
-
         return PrivateInstance;
     }
 

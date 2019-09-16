@@ -242,6 +242,7 @@ MonoBehaviour:
   CellMesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
   CellGroundMaterial: {fileID: 2100000, guid: 51617a7be5d8d224c8a36e0b1d121d2f, type: 2}
   CellWallMaterial: {fileID: 2100000, guid: 5b24d1aa8dcf34440bc7da6d7cfd16c7, type: 2}
+  SecondPerStep: 0.5
 --- !u!4 &1000774792
 Transform:
   m_ObjectHideFlags: 0

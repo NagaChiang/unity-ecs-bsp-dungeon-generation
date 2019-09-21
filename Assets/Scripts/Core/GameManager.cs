@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Timespawn.UnityEcsBspDungeon.Components;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -7,65 +8,68 @@ using Unity.Rendering;
 using Unity.Transforms;
 using UnityEngine;
 
-public class GameManager : MonoBehaviour
+namespace Timespawn.UnityEcsBspDungeon.Core
 {
-    [Header("Dungeon")] 
-    public DungeonComponent DungeonSettings;
-
-    [Header("Cell")]
-    public float CellScale;
-    public Mesh CellMesh;
-    public Material CellGroundMaterial;
-    public Material CellWallMaterial;
-
-    [Header("Display")]
-    public float SecondPerStep;
-
-    // Archetypes
-    public EntityArchetype DungeonArchetype;
-    public EntityArchetype CellArchetype;
-
-    private static GameManager PrivateInstance;
-
-    public static GameManager Instance()
+    public class GameManager : MonoBehaviour
     {
-        return PrivateInstance;
-    }
+        [Header("Dungeon")]
+        public DungeonComponent DungeonSettings;
 
-    private void Awake()
-    {
-        if (PrivateInstance)
+        [Header("Cell")]
+        public float CellScale;
+        public Mesh CellMesh;
+        public Material CellGroundMaterial;
+        public Material CellWallMaterial;
+
+        [Header("Display")]
+        public float SecondPerStep;
+
+        // Archetypes
+        public EntityArchetype DungeonArchetype;
+        public EntityArchetype CellArchetype;
+
+        private static GameManager PrivateInstance;
+
+        public static GameManager Instance()
         {
-            Destroy(this);
-        }
-        else
-        {
-            PrivateInstance = this;
+            return PrivateInstance;
         }
 
-        CreateArchetypes();
+        private void Awake()
+        {
+            if (PrivateInstance)
+            {
+                Destroy(this);
+            }
+            else
+            {
+                PrivateInstance = this;
+            }
 
-        EntityManager entityManager = World.Active.EntityManager;
+            CreateArchetypes();
 
-        Entity dungeon = entityManager.CreateEntity(DungeonArchetype);
-        entityManager.SetComponentData(dungeon, DungeonSettings);
-    }
+            EntityManager entityManager = World.Active.EntityManager;
 
-    private void CreateArchetypes()
-    {
-        EntityManager entityManager = World.Active.EntityManager;
+            Entity dungeon = entityManager.CreateEntity(DungeonArchetype);
+            entityManager.SetComponentData(dungeon, DungeonSettings);
+        }
 
-        DungeonArchetype = entityManager.CreateArchetype (
-            typeof(DungeonComponent),
-            typeof(EntityBufferElement)
-        );
+        private void CreateArchetypes()
+        {
+            EntityManager entityManager = World.Active.EntityManager;
 
-        CellArchetype = entityManager.CreateArchetype (
-            typeof(CellComponent),
-            typeof(Translation),
-            typeof(Scale),
-            typeof(LocalToWorld),
-            typeof(RenderMesh)
-        );
+            DungeonArchetype = entityManager.CreateArchetype(
+                typeof(DungeonComponent),
+                typeof(EntityBufferElement)
+            );
+
+            CellArchetype = entityManager.CreateArchetype(
+                typeof(CellComponent),
+                typeof(Translation),
+                typeof(Scale),
+                typeof(LocalToWorld),
+                typeof(RenderMesh)
+            );
+        }
     }
 }

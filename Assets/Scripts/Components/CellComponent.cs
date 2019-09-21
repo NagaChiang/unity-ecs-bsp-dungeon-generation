@@ -4,13 +4,15 @@ using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
 
-public struct CellComponent : IComponentData
+namespace Timespawn.UnityEcsBspDungeon.Components
 {
-    public int2 Coordinate;
-    public bool IsWall;
-}
+    public struct CellComponent : IComponentData
+    {
+        public int2 Coordinate;
+        public bool IsWall;
+    }
 
-public struct CellRegisteredComponent : IComponentData
-{
-
+    public struct CellRegisteredComponent : IComponentData
+    {
+    }
 }

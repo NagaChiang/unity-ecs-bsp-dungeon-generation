@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using Unity.Entities;
 using UnityEngine;
 
-[InternalBufferCapacity(0)]
-public struct EntityBufferElement : IBufferElementData
+namespace Timespawn.UnityEcsBspDungeon.Components
 {
-    public Entity Entity;
+    [InternalBufferCapacity(10)]
+    public struct EntityBufferElement : IBufferElementData
+    {
+        public Entity Entity;
+    }
 }

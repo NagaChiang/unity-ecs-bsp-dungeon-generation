@@ -5,10 +5,13 @@ using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
 
-[System.Serializable]
-public struct DungeonComponent : IComponentData
+namespace Timespawn.UnityEcsBspDungeon.Components
 {
-    public int2 SizeInCell;
-    public int BspDepth;
-    public bool IsPendingGenerate;
+    [System.Serializable]
+    public struct DungeonComponent : IComponentData
+    {
+        public int2 SizeInCell;
+        public int BspDepth;
+        public bool IsPendingGenerate;
+    }
 }

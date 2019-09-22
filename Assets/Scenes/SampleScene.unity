@@ -236,7 +236,10 @@ MonoBehaviour:
     SizeInCell:
       x: 150
       y: 90
-    BspDepth: 4
+    MinRoomLengthInCells: 10
+    MaxRoomLengthInCells: 25
+    MinSplitRatio: 0.4
+    MaxSplitRatio: 0.6
     IsPendingGenerate: 1
   CellScale: 0.1
   CellMesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}

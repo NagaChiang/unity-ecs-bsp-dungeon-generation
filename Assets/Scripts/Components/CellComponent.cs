@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
@@ -12,7 +13,7 @@ namespace Timespawn.UnityEcsBspDungeon.Components
         public bool IsWall;
     }
 
-    public struct CellRegisteredComponent : IComponentData
+    public struct RegisteredCellComponent : IComponentData
     {
     }
 }

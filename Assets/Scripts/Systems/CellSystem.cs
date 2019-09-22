@@ -5,30 +5,30 @@ using Timespawn.UnityEcsBspDungeon.Core;
 using Unity.Entities;
 using Unity.Rendering;
 using UnityEngine;
+using UnityEngine.Experimental.PlayerLoop;
 
 namespace Timespawn.UnityEcsBspDungeon.Systems
 {
     public class CellSystem : ComponentSystem
     {
         private EntityManager ActiveEntityManager;
-        private EntityQuery OnCreateCellQuery;
-        private EntityQuery ChangedCellQuery;
+        private EntityQuery OnRegisteredCellQuery;
+        private EntityQuery OnChangedCellQuery;
 
         protected override void OnCreate()
         {
             ActiveEntityManager = World.Active.EntityManager;
 
-            OnCreateCellQuery = GetEntityQuery(new EntityQueryDesc
+            OnRegisteredCellQuery = GetEntityQuery(new EntityQueryDesc
             {
                 All = new ComponentType[] {typeof(CellComponent)},
-                None = new ComponentType[] {typeof(CellRegisteredComponent)},
+                None = new ComponentType[] {typeof(RegisteredCellComponent)},
             });
 
-            ChangedCellQuery = GetEntityQuery(
+            OnChangedCellQuery = GetEntityQuery(
                 ComponentType.ReadOnly<CellComponent>(),
-                typeof(RenderMesh)
-            );
-            ChangedCellQuery.SetFilterChanged(typeof(CellComponent));
+                typeof(RenderMesh));
+            OnChangedCellQuery.SetFilterChanged(typeof(CellComponent));
         }
 
         protected override void OnUpdate()
@@ -36,7 +36,7 @@ namespace Timespawn.UnityEcsBspDungeon.Systems
             GameManager gameManager = GameManager.Instance();
             Debug.Assert(gameManager, "GameManager is null");
 
-            Entities.With(OnCreateCellQuery).ForEach((Entity entity, ref CellComponent cellComp) =>
+            Entities.With(OnRegisteredCellQuery).ForEach((Entity entity, ref CellComponent cellComp) =>
             {
                 Entity dungeonEntity = GetSingletonEntity<DungeonComponent>();
                 DungeonComponent dungeonComp = GetSingleton<DungeonComponent>();
@@ -46,13 +46,13 @@ namespace Timespawn.UnityEcsBspDungeon.Systems
                     Entity = entity,
                 };
 
-                int index = cellComp.Coordinate.x + (cellComp.Coordinate.y * dungeonComp.SizeInCell.y);
+                int index = cellComp.Coordinate.x + (cellComp.Coordinate.y * dungeonComp.SizeInCell.x);
                 cellsBuffer.Insert(index, bufferElem);
 
-                PostUpdateCommands.AddComponent(entity, new CellRegisteredComponent());
+                PostUpdateCommands.AddComponent(entity, new RegisteredCellComponent());
             });
 
-            Entities.With(ChangedCellQuery).ForEach((Entity entity, ref CellComponent cellComp) =>
+            Entities.With(OnChangedCellQuery).ForEach((Entity entity, ref CellComponent cellComp) =>
             {
                 Material cellMaterial = cellComp.IsWall ? gameManager.CellWallMaterial : gameManager.CellGroundMaterial;
                 PostUpdateCommands.SetSharedComponent(entity, new RenderMesh

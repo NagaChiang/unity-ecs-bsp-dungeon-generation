@@ -14,6 +14,7 @@ namespace Timespawn.UnityEcsBspDungeon.Components
         public int2 SizeInCell;
         public int MinRoomLengthInCells;
         public int MaxRoomLengthInCells;
+        public int ExtraPathNum;
 
         [Range(0.0f, 1.0f)]
         public float MinSplitRatio;
@@ -21,6 +22,7 @@ namespace Timespawn.UnityEcsBspDungeon.Components
         [Range(0.0f, 1.0f)]
         public float MaxSplitRatio;
 
+        [HideInInspector]
         public bool IsPendingGenerate;
     }
 

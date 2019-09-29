@@ -29,6 +29,8 @@ namespace Timespawn.UnityEcsBspDungeon.Core
         public EntityArchetype CellArchetype;
 
         private static GameManager PrivateInstance;
+        private EntityManager ActiveEntityManager;
+        private Entity DungeonEntity;
 
         public static GameManager Instance()
         {
@@ -48,10 +50,18 @@ namespace Timespawn.UnityEcsBspDungeon.Core
 
             CreateArchetypes();
 
-            EntityManager entityManager = World.Active.EntityManager;
+            ActiveEntityManager = World.Active.EntityManager;
 
-            Entity dungeon = entityManager.CreateEntity(DungeonArchetype);
-            entityManager.SetComponentData(dungeon, DungeonSettings);
+            DungeonEntity = ActiveEntityManager.CreateEntity(DungeonArchetype);
+            ActiveEntityManager.SetComponentData(DungeonEntity, DungeonSettings);
+        }
+
+        public void GenerateDungeon()
+        {
+            DungeonComponent dungeonComp = ActiveEntityManager.GetComponentData<DungeonComponent>(DungeonEntity);
+            dungeonComp.IsPendingGenerate = true;
+
+            ActiveEntityManager.SetComponentData(DungeonEntity, dungeonComp);
         }
 
         private void CreateArchetypes()

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace Timespawn.UnityEcsBspDungeon.Dungeons
 {
@@ -14,6 +15,13 @@ namespace Timespawn.UnityEcsBspDungeon.Dungeons
         public Rect(int2 lowerLeftPos, int width, int height)
         {
             LowerLeftPos = lowerLeftPos;
+            Width = width;
+            Height = height;
+        }
+
+        public Rect(int lowerLeftPosX, int lowerLeftPosY, int width, int height)
+        {
+            LowerLeftPos = new int2(lowerLeftPosX, lowerLeftPosY);
             Width = width;
             Height = height;
         }
@@ -51,6 +59,14 @@ namespace Timespawn.UnityEcsBspDungeon.Dungeons
             }
 
             return positions;
+        }
+
+        public int2 GetRandomInnerPosition()
+        {
+            int randomX = LowerLeftPos.x + Random.Range(1, Width - 1);
+            int randomY = LowerLeftPos.y + Random.Range(1, Height - 1);
+
+            return new int2(randomX, randomY);
         }
     }
 }

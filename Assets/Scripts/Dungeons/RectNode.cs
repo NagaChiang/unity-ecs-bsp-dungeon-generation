@@ -60,20 +60,15 @@ namespace Timespawn.UnityEcsBspDungeon.Dungeons
             return root;
         }
 
-        public static List<RectNode> GetLeafs(RectNode root)
+        public List<RectNode> GetLeafs()
         {
             List<RectNode> leafs = new List<RectNode>();
 
             Stack<RectNode> nodeStack = new Stack<RectNode>();
-            nodeStack.Push(root);
+            nodeStack.Push(this);
             while (nodeStack.Count > 0)
             {
                 RectNode node = nodeStack.Pop();
-                if (node == null)
-                {
-                    continue;
-                }
-
                 if (node.LeftNode == null && node.RightNode == null)
                 {
                     leafs.Add(node);
@@ -85,6 +80,27 @@ namespace Timespawn.UnityEcsBspDungeon.Dungeons
             }
 
             return leafs;
+        }
+
+        public RectNode GetRandomLeaf()
+        {
+            RectNode leaf = null;
+            Stack<RectNode> nodeStack = new Stack<RectNode>();
+            nodeStack.Push(this);
+            while (nodeStack.Count > 0)
+            {
+                RectNode node = nodeStack.Pop();
+                if (node.LeftNode == null && node.RightNode == null)
+                {
+                    leaf = node;
+                    break;
+                }
+
+                RectNode randomNode = Random.value > 0.5f ? node.LeftNode : node.RightNode;
+                nodeStack.Push(randomNode);
+            }
+
+            return leaf;
         }
     }
 }

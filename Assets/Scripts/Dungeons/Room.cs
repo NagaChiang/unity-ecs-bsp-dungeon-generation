@@ -12,5 +12,10 @@ namespace Timespawn.UnityEcsBspDungeon.Dungeons
         {
             Rect = rect;
         }
+
+        public Rect GetRect()
+        {
+            return Rect;
+        }
     }
 }

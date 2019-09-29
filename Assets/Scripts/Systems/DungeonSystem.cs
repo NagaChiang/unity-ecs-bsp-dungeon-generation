@@ -97,6 +97,8 @@ namespace Timespawn.UnityEcsBspDungeon.Systems
                     });
                 }
             }
+
+            dungeon.IsPendingGenerate = true;
         }
 
         private void GenerateDungeon(ref DungeonComponent dungeon, ref DynamicBuffer<EntityBufferElement> cellsBuffer)
@@ -105,37 +107,167 @@ namespace Timespawn.UnityEcsBspDungeon.Systems
 
             dungeon.IsPendingGenerate = false;
 
+            // Set all cells as wall
+            //SetWallAll(ref cellsBuffer, true);
+
+            // Rooms
             Rect fullRect = new Rect(int2.zero, dungeon.SizeInCell.x, dungeon.SizeInCell.y);
             RectNode root = RectNode.CreateBspTree(fullRect, dungeon.MaxRoomLengthInCells, dungeon.MinSplitRatio, dungeon.MaxSplitRatio);
-            List<RectNode> leafs = RectNode.GetLeafs(root);
-            List<Room> rooms = new List<Room>();
+            List<RectNode> leafs = root.GetLeafs();
+            Dictionary<Rect, Room> rooms = new Dictionary<Rect, Room>();
             foreach (RectNode leaf in leafs)
             {
                 Room room = GenerateRoom(leaf.Rect, dungeon.MinRoomLengthInCells, dungeon.SizeInCell.x, ref cellsBuffer);
-                rooms.Add(room);
+                rooms.Add(leaf.Rect, room);
+            }
+
+            // Paths
+            Stack<RectNode> nodeStack = new Stack<RectNode>();
+            nodeStack.Push(root);
+            while (nodeStack.Count > 0)
+            {
+                RectNode node = nodeStack.Pop();
+                if (node.LeftNode == null && node.RightNode == null)
+                {
+                    continue;
+                }
+
+                Room roomLeft = rooms[node.LeftNode.GetRandomLeaf().Rect];
+                Room roomRight = rooms[node.RightNode.GetRandomLeaf().Rect];
+                GeneratePath(roomLeft, roomRight, dungeon.SizeInCell.x, ref cellsBuffer);
+
+                nodeStack.Push(node.LeftNode);
+                nodeStack.Push(node.RightNode);
+            }
+
+            // Extra paths
+            if (root != null && root.LeftNode != null && root.RightNode != null)
+            {
+                for (int count = 0; count < dungeon.ExtraPathNum; count++)
+                {
+                    Room roomLeft = rooms[root.LeftNode.GetRandomLeaf().Rect];
+                    Room roomRight = rooms[root.RightNode.GetRandomLeaf().Rect];
+                    GeneratePath(roomLeft, roomRight, dungeon.SizeInCell.x, ref cellsBuffer);
+                }
             }
         }
 
         private Room GenerateRoom(Rect area, int minLength, int sizeInCellX, ref DynamicBuffer<EntityBufferElement> cellsBuffer)
         {
-            int width = Random.Range(Mathf.Min(minLength, area.Width), area.Width);
-            int height = Random.Range(Mathf.Min(minLength, area.Height), area.Height);
-            int2 lowerLeftPos = area.LowerLeftPos + new int2(Random.Range(0, area.Width - width), Random.Range(0, area.Height - height));
+            int width = Random.Range(Mathf.Min(minLength, area.Width), area.Width + 1);
+            int height = Random.Range(Mathf.Min(minLength, area.Height), area.Height + 1);
+            int2 lowerLeftPos = area.LowerLeftPos + new int2(Random.Range(0, area.Width - width), Random.Range(0, area.Height - height) + 1);
             Rect roomRect = new Rect(lowerLeftPos, width, height);
-            Room room = new Room(roomRect);
+            DigInnerArea(roomRect, sizeInCellX, ref cellsBuffer);
 
-            List<int2> innerPositions = roomRect.GetInnerPositions();
+            Room room = new Room(roomRect);
+            return room;
+        }
+
+        private void GeneratePath(Room room1, Room room2, int sizeInCellX, ref DynamicBuffer<EntityBufferElement> cellsBuffer)
+        {
+            int2 pos1 = room1.GetRect().GetRandomInnerPosition();
+            int2 pos2 = room2.GetRect().GetRandomInnerPosition();
+            int2 offset = pos2 - pos1;
+            int horizontalLength = Mathf.Abs(offset.x) + 1;
+            int verticalLength = Mathf.Abs(offset.y) + 1;
+            
+            bool isHorizontalFirst = Random.value > 0.5f;
+            if (isHorizontalFirst)
+            {
+                // Horizontal first
+                if (offset.x >= 0)
+                {
+                    // Right
+                    DigArea(new Rect(pos1, horizontalLength, 1), sizeInCellX, ref cellsBuffer);
+
+                    if (offset.y >= 0)
+                    {
+                        // Up
+                        DigArea(new Rect(pos2.x, pos1.y, 1, verticalLength), sizeInCellX, ref cellsBuffer);
+                    }
+                    else
+                    {
+                        // Down
+                        DigArea(new Rect(pos2.x, pos2.y, 1, verticalLength), sizeInCellX, ref cellsBuffer);
+                    }
+                }
+                else
+                {
+                    // Left
+                    DigArea(new Rect(pos2.x, pos1.y, horizontalLength, 1), sizeInCellX, ref cellsBuffer);
+
+                    if (offset.y >= 0)
+                    {
+                        // Up
+                        DigArea(new Rect(pos2.x, pos1.y, 1, verticalLength), sizeInCellX, ref cellsBuffer);
+                    }
+                    else
+                    {
+                        // Down
+                        DigArea(new Rect(pos2.x, pos2.y, 1, verticalLength), sizeInCellX, ref cellsBuffer);
+                    }
+                }
+            }
+            else
+            {
+                // Vertical first
+                if (offset.y >= 0)
+                {
+                    // Up
+                    DigArea(new Rect(pos1, 1, verticalLength), sizeInCellX, ref cellsBuffer);
+
+                    if (offset.x >= 0)
+                    {
+                        // Right
+                        DigArea(new Rect(pos1.x, pos2.y, horizontalLength, 1), sizeInCellX, ref cellsBuffer);
+                    }
+                    else
+                    {
+                        // Left
+                        DigArea(new Rect(pos2, horizontalLength, 1), sizeInCellX, ref cellsBuffer);
+                    }
+                }
+                else
+                {
+                    // Down
+                    DigArea(new Rect(pos1.x, pos2.y, 1, verticalLength), sizeInCellX, ref cellsBuffer);
+
+                    if (offset.x >= 0)
+                    {
+                        // Right
+                        DigArea(new Rect(pos1.x, pos2.y, horizontalLength, 1), sizeInCellX, ref cellsBuffer);
+                    }
+                    else
+                    {
+                        // Left
+                        DigArea(new Rect(pos2, horizontalLength, 1), sizeInCellX, ref cellsBuffer);
+                    }
+                }
+            }
+        }
+
+        private void DigArea(Rect rect, int sizeInCellX, ref DynamicBuffer<EntityBufferElement> cellsBuffer)
+        {
+            List<int2> positions = rect.GetPositions();
+            foreach (int2 pos in positions)
+            {
+                SetWall(ref cellsBuffer, sizeInCellX, pos, false);
+            }
+        }
+
+        private void DigInnerArea(Rect rect, int sizeInCellX, ref DynamicBuffer<EntityBufferElement> cellsBuffer)
+        {
+            List<int2> innerPositions = rect.GetInnerPositions();
             foreach (int2 pos in innerPositions)
             {
                 SetWall(ref cellsBuffer, sizeInCellX, pos, false);
             }
-
-            return room;
         }
 
-        private void SetWall(ref DynamicBuffer<EntityBufferElement> cellsBuffer, int sizeInCellX, int2 coord, bool isWall)
+        private void SetWall(ref DynamicBuffer<EntityBufferElement> cellsBuffer, int sizeInCellX, int2 pos, bool isWall)
         {
-            int index = (sizeInCellX * coord.y) + coord.x;
+            int index = (sizeInCellX * pos.y) + pos.x;
             Debug.AssertFormat(index >= 0 && index < cellsBuffer.Length, "Index {0} is not within buffer length {1}", index, cellsBuffer.Length);
 
             Entity entity = cellsBuffer[index].Entity;
@@ -144,6 +276,20 @@ namespace Timespawn.UnityEcsBspDungeon.Systems
             {
                 cellComp.IsWall = isWall;
                 PostUpdateCommands.SetComponent(entity, cellComp);
+            }
+        }
+
+        private void SetWallAll(ref DynamicBuffer<EntityBufferElement> cellsBuffer, bool isWall)
+        {
+            for (int i = 0; i < cellsBuffer.Length; i++)
+            {
+                Entity entity = cellsBuffer[i].Entity;
+                CellComponent cellComp = ActiveEntityManager.GetComponentData<CellComponent>(entity);
+                if (cellComp.IsWall != isWall)
+                {
+                    cellComp.IsWall = isWall;
+                    PostUpdateCommands.SetComponent(entity, cellComp);
+                }
             }
         }
     }

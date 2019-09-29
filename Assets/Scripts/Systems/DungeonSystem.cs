@@ -108,7 +108,7 @@ namespace Timespawn.UnityEcsBspDungeon.Systems
             dungeon.IsPendingGenerate = false;
 
             // Set all cells as wall
-            //SetWallAll(ref cellsBuffer, true);
+            SetWallAll(ref cellsBuffer, true);
 
             // Rooms
             Rect fullRect = new Rect(int2.zero, dungeon.SizeInCell.x, dungeon.SizeInCell.y);

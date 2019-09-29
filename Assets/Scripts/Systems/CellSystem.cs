@@ -47,7 +47,7 @@ namespace Timespawn.UnityEcsBspDungeon.Systems
                 };
 
                 int index = cellComp.Coordinate.x + (cellComp.Coordinate.y * dungeonComp.SizeInCell.x);
-                cellsBuffer.Insert(index, bufferElem);
+                cellsBuffer[index] = bufferElem;
 
                 PostUpdateCommands.AddComponent(entity, new RegisteredCellComponent());
             });

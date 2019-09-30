@@ -1,5 +1,7 @@
 # BSP Dungeon Generation with Unity ECS
 
+![](./dungeon-generation-preview.png)
+
 Experiment with Unity ECS in implementing binary space partitioning to generate random dungeons.
 
 ## Dependencies

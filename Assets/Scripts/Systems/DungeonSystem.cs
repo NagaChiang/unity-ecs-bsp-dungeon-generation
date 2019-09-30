@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using Timespawn.UnityEcsBspDungeon.Components;
 using Timespawn.UnityEcsBspDungeon.Core;
@@ -40,15 +41,6 @@ namespace Timespawn.UnityEcsBspDungeon.Systems
 
         protected override void OnUpdate()
         {
-            LastStepElapsedTime += Time.deltaTime;
-            float secPerStep = GameManager.Instance().SecondPerStep;
-            if (LastStepElapsedTime >= secPerStep)
-            {
-                return;
-            }
-
-            LastStepElapsedTime -= secPerStep;
-
             Entities.With(OnRegisteredDungeonQuery).ForEach((Entity entity, ref DungeonComponent dungeon) =>
             {
                 DynamicBuffer<EntityBufferElement> cellsBuffer = ActiveEntityManager.GetBuffer<EntityBufferElement>(entity);
@@ -97,19 +89,17 @@ namespace Timespawn.UnityEcsBspDungeon.Systems
                     });
                 }
             }
-
-            dungeon.IsPendingGenerate = true;
         }
 
         private void GenerateDungeon(ref DungeonComponent dungeon, ref DynamicBuffer<EntityBufferElement> cellsBuffer)
         {
-            Debug.Assert(dungeon.IsPendingGenerate, "It's not pending generate.");
+            Debug.Assert(dungeon.IsPendingGenerate, "This dungeon is not pending generate.");
 
             dungeon.IsPendingGenerate = false;
 
             // Set all cells as wall
             SetWallAll(ref cellsBuffer, true);
-
+            
             // Rooms
             Rect fullRect = new Rect(int2.zero, dungeon.SizeInCell.x, dungeon.SizeInCell.y);
             RectNode root = RectNode.CreateBspTree(fullRect, dungeon.MaxRoomLengthInCells, dungeon.MinSplitRatio, dungeon.MaxSplitRatio);
@@ -156,7 +146,7 @@ namespace Timespawn.UnityEcsBspDungeon.Systems
         {
             int width = Random.Range(Mathf.Min(minLength, area.Width), area.Width + 1);
             int height = Random.Range(Mathf.Min(minLength, area.Height), area.Height + 1);
-            int2 lowerLeftPos = area.LowerLeftPos + new int2(Random.Range(0, area.Width - width), Random.Range(0, area.Height - height) + 1);
+            int2 lowerLeftPos = area.LowerLeftPos + new int2(Random.Range(0, area.Width - width), Random.Range(0, area.Height - height));
             Rect roomRect = new Rect(lowerLeftPos, width, height);
             DigInnerArea(roomRect, sizeInCellX, ref cellsBuffer);
 
@@ -272,11 +262,8 @@ namespace Timespawn.UnityEcsBspDungeon.Systems
 
             Entity entity = cellsBuffer[index].Entity;
             CellComponent cellComp = ActiveEntityManager.GetComponentData<CellComponent>(entity);
-            if (cellComp.IsWall != isWall)
-            {
-                cellComp.IsWall = isWall;
-                PostUpdateCommands.SetComponent(entity, cellComp);
-            }
+            cellComp.IsWall = isWall;
+            PostUpdateCommands.SetComponent(entity, cellComp);
         }
 
         private void SetWallAll(ref DynamicBuffer<EntityBufferElement> cellsBuffer, bool isWall)
@@ -285,11 +272,8 @@ namespace Timespawn.UnityEcsBspDungeon.Systems
             {
                 Entity entity = cellsBuffer[i].Entity;
                 CellComponent cellComp = ActiveEntityManager.GetComponentData<CellComponent>(entity);
-                if (cellComp.IsWall != isWall)
-                {
-                    cellComp.IsWall = isWall;
-                    PostUpdateCommands.SetComponent(entity, cellComp);
-                }
+                cellComp.IsWall = isWall;
+                PostUpdateCommands.SetComponent(entity, cellComp);
             }
         }
     }

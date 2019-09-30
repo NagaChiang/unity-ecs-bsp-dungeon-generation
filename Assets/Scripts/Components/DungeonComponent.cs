@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using Timespawn.UnityEcsBspDungeon.Dungeons;
 using Unity.Collections;
@@ -14,7 +15,6 @@ namespace Timespawn.UnityEcsBspDungeon.Components
         public int2 SizeInCell;
         public int MinRoomLengthInCells;
         public int MaxRoomLengthInCells;
-        public int ExtraPathNum;
 
         [Range(0.0f, 1.0f)]
         public float MinSplitRatio;
@@ -22,8 +22,21 @@ namespace Timespawn.UnityEcsBspDungeon.Components
         [Range(0.0f, 1.0f)]
         public float MaxSplitRatio;
 
+        public int ExtraPathNum;
+
         [HideInInspector]
         public bool IsPendingGenerate;
+
+        public override string ToString()
+        {
+            String str = "SizeInCell = " + SizeInCell + "\n"
+                         + "RoomLengthInCells = (" + MinRoomLengthInCells + ", " + MaxRoomLengthInCells + ")\n"
+                         + "SplitRatio = (" + MinSplitRatio.ToString("0.00") + ", " + MaxSplitRatio.ToString("0.00") + ")\n"
+                         + "ExtraPathNum = " + ExtraPathNum + "\n"
+                         + "IsPendingGenerate = " + IsPendingGenerate;
+
+            return str;
+        }
     }
 
     public struct RegisteredDungeonComponent : IComponentData

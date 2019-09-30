@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using Timespawn.UnityEcsBspDungeon.Components;
 using Unity.Collections;
@@ -7,22 +8,21 @@ using Unity.Mathematics;
 using Unity.Rendering;
 using Unity.Transforms;
 using UnityEngine;
+using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
 namespace Timespawn.UnityEcsBspDungeon.Core
 {
     public class GameManager : MonoBehaviour
     {
         [Header("Dungeon")]
-        public DungeonComponent DungeonSettings;
+        public DungeonComponent DefaultDungeonSettings;
 
         [Header("Cell")]
         public float CellScale;
         public Mesh CellMesh;
         public Material CellGroundMaterial;
         public Material CellWallMaterial;
-
-        [Header("Display")]
-        public float SecondPerStep;
 
         // Archetypes
         public EntityArchetype DungeonArchetype;
@@ -53,14 +53,25 @@ namespace Timespawn.UnityEcsBspDungeon.Core
             ActiveEntityManager = World.Active.EntityManager;
 
             DungeonEntity = ActiveEntityManager.CreateEntity(DungeonArchetype);
-            ActiveEntityManager.SetComponentData(DungeonEntity, DungeonSettings);
+            ActiveEntityManager.SetComponentData(DungeonEntity, DefaultDungeonSettings);
         }
 
-        public void GenerateDungeon()
+        private void Start()
         {
-            DungeonComponent dungeonComp = ActiveEntityManager.GetComponentData<DungeonComponent>(DungeonEntity);
-            dungeonComp.IsPendingGenerate = true;
+            UIManager.Instance().Init(DefaultDungeonSettings);
+            UIManager.Instance().GenerateButton_OnClick();
+        }
 
+        public void GenerateDungeon(DungeonComponent dungeonCompData, int seed)
+        {
+            Random.InitState(seed);
+            
+            // Setup dungeon
+            DungeonComponent dungeonComp = ActiveEntityManager.GetComponentData<DungeonComponent>(DungeonEntity);
+            dungeonComp = dungeonCompData;
+            dungeonComp.SizeInCell = DefaultDungeonSettings.SizeInCell;
+            dungeonComp.IsPendingGenerate = true;
+            
             ActiveEntityManager.SetComponentData(DungeonEntity, dungeonComp);
         }
 

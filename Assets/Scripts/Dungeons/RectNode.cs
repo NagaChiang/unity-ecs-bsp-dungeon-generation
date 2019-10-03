@@ -19,44 +19,53 @@ namespace Timespawn.UnityEcsBspDungeon.Dungeons
             RightNode = rightNode;
         }
 
-        public static RectNode CreateBspTree(Rect parentRect, int threshold, float minSplitRatio, float maxSplitRatio)
+        public static RectNode CreateBspTree(Rect fullRect, int threshold, float minSplitRatio, float maxSplitRatio)
         {
             Debug.Assert(threshold > 0, "BSP threshold should be positive.");
             Debug.Assert(minSplitRatio >= 0.0f && minSplitRatio <= 1.0f, "BSP min split ratio should be between 0.0 to 1.0.");
             Debug.Assert(maxSplitRatio >= 0.0f && maxSplitRatio <= 1.0f, "BSP max split ratio should be between 0.0 to 1.0.");
             Debug.Assert(minSplitRatio <= maxSplitRatio, "BSP min split ratio should be less than max.");
 
-            RectNode root = new RectNode(parentRect, null, null);
-            if (parentRect.Width <= threshold || parentRect.Height <= threshold)
+            RectNode root = new RectNode(fullRect, null, null);
+            Stack<RectNode> nodeStack = new Stack<RectNode>();
+            nodeStack.Push(root);
+            while (nodeStack.Count > 0)
             {
-                return root;
+                RectNode node = nodeStack.Pop();
+                Rect nodeRect = node.Rect;
+                if (nodeRect.Width <= threshold || nodeRect.Height <= threshold)
+                {
+                    continue;
+                }
+
+                Rect rectLeft = new Rect();
+                Rect rectRight = new Rect();
+                float splitRatio = Random.Range(minSplitRatio, maxSplitRatio);
+                if (nodeRect.Width >= nodeRect.Height)
+                {
+                    // Split horizontally
+                    int leftWidth = Mathf.FloorToInt(nodeRect.Width * splitRatio);
+                    int2 rightPos = nodeRect.LowerLeftPos + new int2(leftWidth, 0);
+
+                    rectLeft.SetRect(nodeRect.LowerLeftPos, leftWidth, nodeRect.Height);
+                    rectRight.SetRect(rightPos, nodeRect.Width - leftWidth, nodeRect.Height);
+                }
+                else
+                {
+                    // Split vertically
+                    int lowerHeight = Mathf.FloorToInt(nodeRect.Height * splitRatio);
+                    int2 upperPos = nodeRect.LowerLeftPos + new int2(0, lowerHeight);
+
+                    rectLeft.SetRect(nodeRect.LowerLeftPos, nodeRect.Width, lowerHeight);
+                    rectRight.SetRect(upperPos, nodeRect.Width, nodeRect.Height - lowerHeight);
+                }
+
+                node.LeftNode = new RectNode(rectLeft, null, null);
+                node.RightNode = new RectNode(rectRight, null, null);
+                nodeStack.Push(node.LeftNode);
+                nodeStack.Push(node.RightNode);
             }
 
-            Rect rect1 = new Rect();
-            Rect rect2 = new Rect();
-            float splitRatio = Random.Range(minSplitRatio, maxSplitRatio);
-            if (parentRect.Width >= parentRect.Height)
-            {
-                // Split horizontally
-                int leftWidth = Mathf.FloorToInt(parentRect.Width * splitRatio);
-                int2 rightPos = parentRect.LowerLeftPos + new int2(leftWidth, 0);
-
-                rect1.SetRect(parentRect.LowerLeftPos, leftWidth, parentRect.Height);
-                rect2.SetRect(rightPos, parentRect.Width - leftWidth, parentRect.Height);
-            }
-            else
-            {
-                // Split vertically
-                int lowerHeight = Mathf.FloorToInt(parentRect.Height * splitRatio);
-                int2 upperPos = parentRect.LowerLeftPos + new int2(0, lowerHeight);
-
-                rect1.SetRect(parentRect.LowerLeftPos, parentRect.Width, lowerHeight);
-                rect2.SetRect(upperPos, parentRect.Width, parentRect.Height - lowerHeight);
-            }
-
-            root.LeftNode = CreateBspTree(rect1, threshold, minSplitRatio, maxSplitRatio);
-            root.RightNode = CreateBspTree(rect2, threshold, minSplitRatio, maxSplitRatio);
-            
             return root;
         }
 

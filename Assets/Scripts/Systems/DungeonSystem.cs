@@ -22,8 +22,6 @@ namespace Timespawn.UnityEcsBspDungeon.Systems
         private EntityQuery OnRegisteredDungeonQuery;
         private EntityQuery DungeonQuery;
 
-        private float LastStepElapsedTime;
-
         protected override void OnCreate()
         {
             ActiveEntityManager = World.Active.EntityManager;

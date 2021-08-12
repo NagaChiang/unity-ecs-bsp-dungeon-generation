@@ -13,7 +13,7 @@ Experiment with Unity ECS in implementing binary space partitioning to generate 
 - Hybrid Renderer 0.0.1-preview
 - Jobs 0.0.7-preview
 
-## References
+## Reference
 
 - [Getting Started with ECS in Unity 2019 by Code Monkey](https://www.youtube.com/watch?v=ILfUuBLfzGI)
 - [Basic BSP Dungeon generation - RogueBasin](http://www.roguebasin.com/index.php?title=Basic_BSP_Dungeon_generation)
